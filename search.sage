@@ -153,7 +153,7 @@ def search4(d):
                                                 else:
                                                     print("ad-hoc needed")
                                                 print()
- def fullSearch(d):
+def fullSearch(d):
     if len(d)==4:
         search4(d)
     if len(d)==5:
