@@ -72,7 +72,7 @@ Hessians[(2,0,1)] = (0/4)*Hessians[(0,1,2,3)] + (0/4)*Hessians[(0,1,3,2)] + (0/4
 Hessians[(2,1,0)] = (0/4)*Hessians[(0,1,2,3)] + (0/4)*Hessians[(0,1,3,2)] + (0/4)*Hessians[(0,2,1,3)] + (0/4)*Hessians[(0,2,3,1)] + (0/4)*Hessians[(0,3,1,2)] + (1/4)*Hessians[(0,3,2,1)] + (0/4)*Hessians[(1,0,2,3)] + (0/4)*Hessians[(1,0,3,2)] + (0/4)*Hessians[(1,2,0,3)] + (0/4)*Hessians[(1,2,3,0)] + (0/4)*Hessians[(1,3,0,2)] + (1/4)*Hessians[(1,3,2,0)] + (0/4)*Hessians[(2,0,1,3)] + (0/4)*Hessians[(2,0,3,1)] + (1/4)*Hessians[(2,1,0,3)] + (1/4)*Hessians[(2,1,3,0)] + (0/4)*Hessians[(2,3,0,1)] + (2/4)*Hessians[(2,3,1,0)] + (0/4)*Hessians[(3,0,1,2)] + (1/4)*Hessians[(3,0,2,1)] + (1/4)*Hessians[(3,1,0,2)] + (2/4)*Hessians[(3,1,2,0)] + (2/4)*Hessians[(3,2,0,1)] + (4/4)*Hessians[(3,2,1,0)]
 Hessians[(0,1)] = (3/3)*Hessians[(0,1,2)] + (2/3)*Hessians[(0,2,1)] + (2/3)*Hessians[(1,0,2)] + (1/3)*Hessians[(1,2,0)] + (1/3)*Hessians[(2,0,1)] + (0/3)*Hessians[(2,1,0)]
 Hessians[(1,0)] = (0/3)*Hessians[(0,1,2)] + (1/3)*Hessians[(0,2,1)] + (1/3)*Hessians[(1,0,2)] + (2/3)*Hessians[(1,2,0)] + (2/3)*Hessians[(2,0,1)] + (3/3)*Hessians[(2,1,0)]
-def fullSearch(d):
+def search5(d):
     d0,d1,d2,d3,d4=d
     n=d0
     constant_covers=[]
@@ -104,12 +104,57 @@ def fullSearch(d):
                                                 H=sum([coeffs[i]*Hessians[tuple(perms[i])] for i in range(len(perms))])
                                                 evals=H.eigenvalues()
                                                 print("Low: ",end='')
-                                                if min(evals)<0: and max(evals)>0:
+                                                if min(evals)<0:
                                                     print(f"Hessian eigenvalue {min(evals)}")
                                                 else:
                                                     print("ad-hoc needed")
                                                 print("High: ",end='')
-                                                if max(evals)>0: and max(evals)>0:
+                                                if max(evals)>0:
                                                     print(f"Hessian eigenvalue {max(evals)}")
                                                 else:
                                                     print("ad-hoc needed")
+                                                print()
+def search4(d):
+    d0,d1,d2,d3=d
+    n=d0
+    constant_covers=[]
+    for q0 in Permutations(d0):
+        for q1 in Permutations(d1):
+            if d1<d0 or q1<q0:
+                for q2 in Permutations(d2):
+                    if d2<d1 or q2<q1:
+                        for q3 in Permutations(d3):
+                            if d3<d2 or q3<q2:
+                                        rawperms=[q0,q1,q2,q3]
+                                        perms=[[x-1 for x in q] for q in rawperms]
+                                        mats=[genPermMatrix(p,n) for p in perms]
+                                        result=covers(mats)
+                                        if result!='does not cover' and 0 not in result[1]:
+                                            coeffs=standardize(result[1].list())
+                                            this_comb=[(perms[i],coeffs[i]) for i in range(len(perms))]
+                                            already_found=False
+                                            for c in constant_covers:
+                                                if equivCombsOfPerms(this_comb,c):
+                                                    already_found=True
+                                                    break
+                                            if not already_found:
+                                                constant_covers+=[this_comb]
+                                                print(f"constant cover {this_comb}")
+                                                H=sum([coeffs[i]*Hessians[tuple(perms[i])] for i in range(len(perms))])
+                                                evals=H.eigenvalues()
+                                                print("Low: ",end='')
+                                                if min(evals)<0:
+                                                    print(f"Hessian eigenvalue {min(evals)}")
+                                                else:
+                                                    print("ad-hoc needed")
+                                                print("High: ",end='')
+                                                if max(evals)>0:
+                                                    print(f"Hessian eigenvalue {max(evals)}")
+                                                else:
+                                                    print("ad-hoc needed")
+                                                print()
+ def fullsearch(d):
+    if len(d)==4:
+        search4(d)
+    if len(d)==5:
+        search5(d)
