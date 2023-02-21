@@ -239,3 +239,38 @@ def search5(d):
     else:
         print(f"Found {len(constant_covers)} distinct nonzero covers.")
     return
+# handles case assignment
+def search(d):
+    r=len(d)
+    if r not in [4,5]:
+        print("Please enter a list of four or five permutation lengths, each at least two.")
+        return
+    d.sort(reverse=True)
+    if d[-1]<2:
+        print("Please enter a list of four or five permutation lengths, each at least two.")
+        return
+    if d[0]<4:
+        print("QR-forcing expressions require a permutation of length at least four.")
+        return
+    if d[0]!=d[1]:
+        print("NO CONSTANT COVER POSSIBLE, since the maximum length must be repeated.")
+        return
+    if d[2]<d[0]-1:
+        print("NO CONSTANT COVER POSSIBLE, since third largest length is too short.")
+        return        
+    if (r==4 and d[0]>6) or (r==5 and d[0]>10):
+        print("NO CONSTANT COVER POSSIBLE, via first row alone.")
+        return
+    if r==4 and d[0]>4 and d[2]==d[0]:
+        searchREsingle(d)
+        return
+    if r==4:
+        search4(d)
+        return
+    if d==[5,5,5,5,5]:
+        searchLS5(True) # True: show all covers; False: show only those failing the Hessian check
+    if d[0]==4:
+        search5(d)
+    if d[0]>4:
+        print("Not yet implemented; stay tuned.")
+    return
