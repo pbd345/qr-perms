@@ -403,21 +403,29 @@ def search(d):
         return
     if r==4 and d[0:2]==[6,6,5]:
         searchRRXX(d)
+        return
     if r==4:
         searchXXXX(d)
         return
     if d==[5,5,5,5,5]:
         search55555(True) # True: show all covers; False: show only those failing the Hessian check
+        return
     if d[0:3] in [[5,5,5],[6,6,6]]:
         searchRRRRX(d)
+        return
     if d[0:4]==[6,6,5,5]:
         search6655X(d)
+        return
     if d[0]<=4:
         searchXXXXX(d)
+        return
     if d[0]==5:
         search554XX(d)
+        return
     if d[0] in [9,10]:
         print("NO CONSTANT COVER POSSIBLE, since the first row can't interpolate.")
+        return
     if d[0] in [6,7,8]:
         print("Not yet implemented; stay tuned.")
+        return
     return
