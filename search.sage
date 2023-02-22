@@ -115,7 +115,7 @@ def search4(d):
     for di in Set(d):
         for p in Permutations(list(range(di))):
             gpm[(tuple(p),n)]=genPermMatrix(p,n)
-    load('Hessians.sage')
+    load('https://raw.githubusercontent.com/pbd345/qr-perms/main/Hessians.sage')
     constant_covers=[]
     for q0 in Permutations(d0):
         for q1 in Permutations(d1):
@@ -161,8 +161,8 @@ def search4(d):
     return
 # search constant covers based on latin squares of order 5
 def searchLS5(showall=False):
-    load('55555-modD4.sage')
-    load('Hessians.sage')
+    load('https://raw.githubusercontent.com/pbd345/qr-perms/main/55555-modD4.sage')
+    load('https://raw.githubusercontent.com/pbd345/qr-perms/main/Hessians.sage')
     for L in D4distinct_lists:
         H=matrix(QQ,16,16)
         for p in L:
