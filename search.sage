@@ -135,13 +135,13 @@ def searchRRRRX(d):
     return
 # search over four permutations of specified lengths
 def searchXXXX(d):
+    load('https://raw.githubusercontent.com/pbd345/qr-perms/main/Hessians.sage')
     d0,d1,d2,d3=d
     n=d0
     gpm={}
     for di in Set(d):
         for p in Permutations(list(range(di))):
             gpm[(tuple(p),n)]=genPermMatrix(p,n)
-    load('https://raw.githubusercontent.com/pbd345/qr-perms/main/Hessians.sage')
     constant_covers=[]
     for q0 in Permutations(d0):
         for q1 in Permutations(d1):
@@ -213,7 +213,7 @@ def search55555(showall=False):
     return
 # search over five permutations of lengths 5,5,4,*,* exploiting structure on the first two
 def search554XX(d):
-    load('Hessians.sage')
+    load('https://raw.githubusercontent.com/pbd345/qr-perms/main/Hessians.sage')
     d0,d1,d2,d3,d4=d
     n=d0 # should equal 5
     gpm={}
@@ -268,7 +268,7 @@ def search554XX(d):
     return
 # search over five permutations of lengths 6,6,5,5,* exploiting structure on the first two
 def search6655X(d):
-    load('Hessians.sage')
+    load('https://raw.githubusercontent.com/pbd345/qr-perms/main/Hessians.sage')
     d0,d1,d2,d3,d4=d
     n=d0 # should equal 6
     gpm={}
@@ -323,6 +323,7 @@ def search6655X(d):
     return
 # search over five permutations of specified lengths
 def searchXXXXX(d):
+    load('https://raw.githubusercontent.com/pbd345/qr-perms/main/Hessians.sage')
     d0,d1,d2,d3,d4=d
     n=d0
     gpm={}
