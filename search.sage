@@ -133,9 +133,28 @@ def searchRRRRX(d):
     else:
         print("CONSTANT COVER NOT RULED OUT")
     return
+# Hessian matrices, normalized as in earlier paper but extended to include 5-perms
+load('https://raw.githubusercontent.com/pbd345/qr-perms/main/Hessians.sage')
+# check Hessian eigenvalues for a linear combination [[perm1,coeff1],[perm2,coeff2],...]
+def saddleCheck(comb):
+    H=sum([term[1]*Hessians[tuple(term[0])] for term in comb])
+    evals=H.eigenvalues()
+    print("Min Hessian eigenvalue ",end='')
+    lam_min=min(evals)
+    if lam_min<0:
+        print(f"= {numerical_approx(lam_min, digits=6)} < 0.")
+    else:
+        print(">= 0; ad-hoc construction needed.")
+    print("Max Hessian eigenvalue ",end='')
+    lam_max=max(evals)
+    if lam_max>0:
+        print(f"= {numerical_approx(lam_max, digits=6)} > 0.")
+    else:
+        print("<= 0; ad-hoc construction needed.")                                                    
+    print()
+    return
 # search over four permutations of specified lengths
 def searchXXXX(d):
-    load('https://raw.githubusercontent.com/pbd345/qr-perms/main/Hessians.sage')
     d0,d1,d2,d3=d
     n=d0
     gpm={}
@@ -165,21 +184,7 @@ def searchXXXX(d):
                                             if not already_found:
                                                 constant_covers+=[this_comb]
                                                 print(f"CONSTANT COVER {displayComb(this_comb)}")
-                                                H=sum([coeffs[i]*Hessians[tuple(perms[i])] for i in range(len(perms))])
-                                                evals=H.eigenvalues()
-                                                print("Min Hessian eigenvalue ",end='')
-                                                lam_min=min(evals)
-                                                if lam_min<0:
-                                                    print(f"= {numerical_approx(lam_min, digits=6)} < 0.")
-                                                else:
-                                                    print(">= 0; ad-hoc construction needed.")
-                                                print("Max Hessian eigenvalue ",end='')
-                                                lam_max=max(evals)
-                                                if lam_max>0:
-                                                    print(f"= {numerical_approx(lam_max, digits=6)} > 0.")
-                                                else:
-                                                    print("<= 0; ad-hoc construction needed.")                                                    
-                                                print()
+                                                saddleCheck(this_comb)
     if constant_covers==[]:
         print("No nonzero covers found.")
     else:
@@ -188,7 +193,6 @@ def searchXXXX(d):
 # search constant covers based on latin squares of order 5
 def search55555(showall=False):
     load('https://raw.githubusercontent.com/pbd345/qr-perms/main/55555-modD4.sage')
-    load('https://raw.githubusercontent.com/pbd345/qr-perms/main/Hessians.sage')
     for L in D4distinct_lists:
         H=matrix(QQ,16,16)
         for p in L:
@@ -197,23 +201,13 @@ def search55555(showall=False):
         lam_min=min(evals)
         lam_max=max(evals)
         if lam_min>=0 or lam_max<=0 or showall:
-            print(f"CONSTANT COVER {displayComb([[p,1] for p in L])}")
-            print(f"Min Hessian eigenvalue ",end='')
-            if lam_min<0:
-                print(f"= {numerical_approx(lam_min, digits=6)} < 0.")
-            else:
-                print(">= 0; ad-hoc construction needed.")
-            print("Max Hessian eigenvalue ",end='')
-            if lam_max>0:
-                print(f"= {numerical_approx(lam_max, digits=6)} > 0.")
-            else:
-                print("<= 0; ad-hoc construction needed.")                                                    
-            print()
+            this_comb=[[p,1] for p in L]
+            print(f"CONSTANT COVER {displayComb(this_comb)}")
+            saddleCheck(this_comb)
     print(f"Found {len(D4distinct_lists)} distinct nonzero covers.")
     return
 # search over five permutations of lengths 5,5,4,*,* exploiting structure on the first two
 def search554XX(d):
-    load('https://raw.githubusercontent.com/pbd345/qr-perms/main/Hessians.sage')
     d0,d1,d2,d3,d4=d
     n=d0 # should equal 5
     gpm={}
@@ -246,21 +240,7 @@ def search554XX(d):
                                             if not already_found:
                                                 constant_covers+=[this_comb]
                                                 print(f"CONSTANT COVER {displayComb(this_comb)}")
-                                                H=sum([coeffs[i]*Hessians[tuple(perms[i])] for i in range(len(perms))])
-                                                evals=H.eigenvalues()
-                                                print("Min Hessian eigenvalue ",end='')
-                                                lam_min=min(evals)
-                                                if lam_min<0:
-                                                    print(f"= {numerical_approx(lam_min, digits=6)} < 0.")
-                                                else:
-                                                    print(">= 0; ad-hoc construction needed.")
-                                                print("Max Hessian eigenvalue ",end='')
-                                                lam_max=max(evals)
-                                                if lam_max>0:
-                                                    print(f"= {numerical_approx(lam_max, digits=6)} > 0.")
-                                                else:
-                                                    print("<= 0; ad-hoc construction needed.")                                                    
-                                                print()
+                                                saddleCheck(this_comb)
     if constant_covers==[]:
         print("No nonzero covers found.")
     else:
@@ -268,7 +248,6 @@ def search554XX(d):
     return
 # search over five permutations of lengths 6,6,5,5,* exploiting structure on the first two
 def search6655X(d):
-    load('https://raw.githubusercontent.com/pbd345/qr-perms/main/Hessians.sage')
     d0,d1,d2,d3,d4=d
     n=d0 # should equal 6
     gpm={}
@@ -301,21 +280,7 @@ def search6655X(d):
                                             if not already_found:
                                                 constant_covers+=[this_comb]
                                                 print(f"CONSTANT COVER {displayComb(this_comb)}")
-                                                H=sum([coeffs[i]*Hessians[tuple(perms[i])] for i in range(len(perms))])
-                                                evals=H.eigenvalues()
-                                                print("Min Hessian eigenvalue ",end='')
-                                                lam_min=min(evals)
-                                                if lam_min<0:
-                                                    print(f"= {numerical_approx(lam_min, digits=6)} < 0.")
-                                                else:
-                                                    print(">= 0; ad-hoc construction needed.")
-                                                print("Max Hessian eigenvalue ",end='')
-                                                lam_max=max(evals)
-                                                if lam_max>0:
-                                                    print(f"= {numerical_approx(lam_max, digits=6)} > 0.")
-                                                else:
-                                                    print("<= 0; ad-hoc construction needed.")                                                    
-                                                print()
+                                                saddleCheck(this_comb)
     if constant_covers==[]:
         print("No nonzero covers found.")
     else:
@@ -323,7 +288,6 @@ def search6655X(d):
     return
 # search over five permutations of specified lengths
 def searchXXXXX(d):
-    load('https://raw.githubusercontent.com/pbd345/qr-perms/main/Hessians.sage')
     d0,d1,d2,d3,d4=d
     n=d0
     gpm={}
@@ -356,21 +320,7 @@ def searchXXXXX(d):
                                             if not already_found:
                                                 constant_covers+=[this_comb]
                                                 print(f"CONSTANT COVER {displayComb(this_comb)}")
-                                                H=sum([coeffs[i]*Hessians[tuple(perms[i])] for i in range(len(perms))])
-                                                evals=H.eigenvalues()
-                                                print("Min Hessian eigenvalue ",end='')
-                                                lam_min=min(evals)
-                                                if lam_min<0:
-                                                    print(f"= {numerical_approx(lam_min, digits=6)} < 0.")
-                                                else:
-                                                    print(">= 0; ad-hoc construction needed.")
-                                                print("Max Hessian eigenvalue ",end='')
-                                                lam_max=max(evals)
-                                                if lam_max>0:
-                                                    print(f"= {numerical_approx(lam_max, digits=6)} > 0.")
-                                                else:
-                                                    print("<= 0; ad-hoc construction needed.")                                                    
-                                                print()
+                                                saddleCheck(this_comb)
     if constant_covers==[]:
         print("No nonzero covers found.")
     else:
