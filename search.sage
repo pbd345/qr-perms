@@ -501,7 +501,7 @@ def search(d):
     if d[0:3] in [[5,5,5],[6,6,6]]:
         searchRRRXX(d)
         return
-    if d[0]>10 or 4+(n-d[2])+(n-d[3])<d[0]-2:
+    if d[0]>10 or 4+(d[0]-d[2])+(d[0]-d[3])<d[0]-2:
         print("NO CONSTANT COVER POSSIBLE, since first four permutations leave more than two entries uncovered.")
         return        
     if d[0]<=4:
