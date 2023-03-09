@@ -504,15 +504,16 @@ def search(d):
     if r==4 and d[0]>6:
         print("NO CONSTANT COVER POSSIBLE, since first three permutations leave more than two entries uncovered.")
         return
-    if r==4 and d[0:2] in [[5,5,5],[6,6,6]]:
+    if r==4 and d[0:3] in [[5,5,5],[6,6,6]]:
         searchRRRX(d)
         return
-    if r==4 and d[0:2]==[6,6,5]:
+    if r==4 and d[0:3]==[6,6,5]:
         searchRRXX(d)
         return
     if r==4:
         searchXXXX(d)
         return
+# r = 5 cases start here    
     if d[0]-d[4]>3+(d[0]-d[2])+(d[0]-d[3]):
         print("NO CONSTANT COVER POSSIBLE, since fifth largest length is too short.")
         return
