@@ -425,39 +425,60 @@ def genPermMatrixByRow(p,n,m=None,k=None):
     if l==n:
         return matrix(m,n,lambda x,y:p[x]==y)
     return factorial(n-k)/binomial(n,k)*matrix(m,n,lambda x,y:sum([binomial(x,j)*binomial(n-1-x,k-1-j)*binomial(y,p[j])*binomial(n-1-y,k-1-p[j]) for j in range(l)]))
-def searchByRow(d,m=None):
+def searchByRow(d):
     d0,d1,d2,d3,d4=d
     n=d0
-    if m==None:
-        m=n
-    gpm={}
-    for di in Set(d):
-        for p in Permutations(list(range(di)),m):
-            gpm[(tuple(p),n,di)]=genPermMatrixByRow(p,n,m,di)
-    for q0 in Permutations(d0,m):
-        for q1 in Permutations(d1,m):
-            if d2==n or [q0[i]+q1[i]-(n+1) for i in range(m)]==[0]*m:
-                for q2 in Permutations(d2,m):
-                    if d2<d1 or q2<=q1:
-                        for q3 in Permutations(d3,m):
-                            if d3<d2 or q3<=q2:
-                                for q4 in Permutations(d4,m):
-                                    if d4<d3 or q4<=q3:
-                                        rawperms=[q0,q1,q2,q3,q4]
-                                        perms=[[x-1 for x in q] for q in rawperms]
-                                        mats=[gpm[(tuple(perms[i]),n,d[i])] for i in range(5)]
-                                        result=hasConstantComb(mats)
-                                        if result!='does not cover' and 0 not in result[1]:
-                                            print(f"SEARCH FAILS TO RULE OUT CONSTANT COVER")
-                                            return
-    if m==1:
-        rowstring="row."
-    else:
-        rowstring=str(m)+" rows."
-    print("NO CONSTANT COVER POSSIBLE, by searching over first "+rowstring)
+    prefixes=[[[[]]*5]]
+    print("Searching for non-vanishing constant covers by rows.")
+    for m in range(1,d4+1):
+        gpm={}
+        for di in Set(d):
+            for p in Permutations(list(range(di)),m):
+                gpm[(tuple(p),n,m,di)]=genPermMatrixByRow(p,n,m,di)
+        if m==1:
+            rowstring="row"
+        else:
+            rowstring=str(m)+" rows"
+        print(f"Checking first {rowstring}.")
+        these_prefixes=[]
+        for q0 in Permutations(d0,m):
+            rawperms=[q0]
+            perms=[[x-1 for x in q] for q in rawperms]
+            if [Q[0:m-1] for Q in perms] in [R[0:len(perms)] for R in prefixes[-1]]:
+                for q1 in Permutations(d1,m):
+                    if q1<=q0:
+                        rawperms=[q0,q1]
+                        perms=[[x-1 for x in q] for q in rawperms]
+                        if [Q[0:m-1] for Q in perms] in [R[0:len(perms)] for R in prefixes[-1]]:
+                            for q2 in Permutations(d2,m):
+                                if d2<d1 or q2<=q1:
+                                    rawperms=[q0,q1,q2]
+                                    perms=[[x-1 for x in q] for q in rawperms]
+                                    if [Q[0:m-1] for Q in perms] in [R[0:len(perms)] for R in prefixes[-1]]:
+                                        for q3 in Permutations(d3,m):
+                                            if d3<d2 or q3<=q2:
+                                                rawperms=[q0,q1,q2,q3]
+                                                perms=[[x-1 for x in q] for q in rawperms]
+                                                if [Q[0:m-1] for Q in perms] in [R[0:len(perms)] for R in prefixes[-1]]:
+                                                    for q4 in Permutations(d4,m):
+                                                        if d4<d3 or q4<=q3:
+                                                            rawperms=[q0,q1,q2,q3,q4]
+                                                            perms=[[x-1 for x in q] for q in rawperms]
+                                                            if [Q[0:m-1] for Q in perms] in [R[0:len(perms)] for R in prefixes[-1]]:
+                                                                mats=[gpm[(tuple(perms[i]),n,m,d[i])] for i in range(5)]
+                                                                result=hasConstantComb(mats)
+                                                                if result!='does not cover':
+                                                                    these_prefixes+=[perms]
+                                                                #print(perms)
+        if these_prefixes==[]:
+            print(f"No non-vanishing constant cover.")
+            return
+        print(f"List of valid prefixes after searching first {rowstring}:")
+        for R in these_prefixes:
+            print(R)
+        prefixes+=[these_prefixes]
+    print("CONSTANT COVER NOT RULED OUT")
     return
-onerowcases=[[6, 6, 6, 6, 2], [7, 7, 6, 4, 4], [7, 7, 6, 5, 5], [7, 7, 6, 6, 2], [7, 7, 6, 6, 3], [7, 7, 6, 6, 4], [7, 7, 6, 6, 5], [7, 7, 6, 6, 6], [7, 7, 7, 5, 2], [7, 7, 7, 5, 4], [7, 7, 7, 5, 5], [7, 7, 7, 6, 2], [7, 7, 7, 6, 3], [7, 7, 7, 6, 4], [7, 7, 7, 6, 5], [7, 7, 7, 6, 6], [8, 8, 7, 5, 2], [8, 8, 7, 5, 4], [8, 8, 7, 6, 2], [8, 8, 7, 6, 3], [8, 8, 7, 6, 6], [8, 8, 7, 7, 2], [8, 8, 7, 7, 4], [8, 8, 7, 7, 5], [8, 8, 7, 7, 6], [8, 8, 7, 7, 7], [8, 8, 8, 6, 2], [8, 8, 8, 6, 3], [8, 8, 8, 6, 4], [8, 8, 8, 6, 5], [8, 8, 8, 6, 6], [9, 9, 8, 6, 2], [9, 9, 8, 6, 3], [9, 9, 8, 6, 4], [9, 9, 8, 6, 5], [9, 9, 8, 6, 6], [9, 9, 8, 7, 2], [9, 9, 8, 7, 3], [9, 9, 8, 7, 4], [9, 9, 8, 7, 5], [9, 9, 8, 7, 6], [9, 9, 8, 7, 7], [10, 10, 9, 7, 3], [10, 10, 9, 7, 4], [10, 10, 9, 7, 5], [10, 10, 9, 7, 6], [10, 10, 9, 7, 7]]
-tworowcases=[[6, 6, 5, 3, 2], [6, 6, 5, 3, 3], [6, 6, 5, 4, 2], [6, 6, 5, 4, 3], [6, 6, 5, 4, 4], [6, 6, 5, 5, 2], [6, 6, 5, 5, 3], [6, 6, 5, 5, 4], [6, 6, 5, 5, 5], [6, 6, 6, 4, 2], [6, 6, 6, 4, 3], [6, 6, 6, 4, 4], [6, 6, 6, 5, 2], [6, 6, 6, 5, 3], [6, 6, 6, 5, 5], [6, 6, 6, 6, 3], [6, 6, 6, 6, 4], [6, 6, 6, 6, 5], [7, 7, 6, 4, 2], [7, 7, 6, 4, 3], [7, 7, 6, 5, 2], [7, 7, 6, 5, 3], [7, 7, 7, 5, 3], [8, 8, 7, 5, 3], [8, 8, 7, 5, 5], [8, 8, 7, 6, 4], [8, 8, 7, 6, 5], [8, 8, 7, 7, 3]]
 # handles case assignment
 def search(d):
     r=len(d)
@@ -510,14 +531,8 @@ def search(d):
     if d[0:3]==[5,5,4]:
         search554XX(d)
         return
-    if d==[7,7,6,5,4]:
-        print("NO CONSTANT COVER POSSIBLE, by interpolation.")
-        return
-    if d in onerowcases:
-        searchByRow(d,1)
-        return
-    if d in tworowcases:
-        searchByRow(d,2)
+    if d[0]>=5:
+        searchByRow(d)
         return
     searchXXXXX(d)
     return
