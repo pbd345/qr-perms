@@ -2,12 +2,22 @@
 def genPermMatrix(p,n):
     k=len(p)
     if k==n:
-        return matrix(n,n,lambda x,y:p[x]==y)
+        return matrix(QQ,n,n,lambda x,y:p[x]==y)
     return factorial(n-k)/binomial(n,k)*matrix(n,n,lambda x,y:sum([binomial(x,j)*binomial(n-1-x,k-1-j)*binomial(y,p[j])*binomial(n-1-y,k-1-p[j]) for j in range(k)]))
+# first m rows of the above based on a k-permutation of [n]
+def genPermMatrixByRow(p,n,m=None,k=None):
+    if m==None:
+        m=n
+    l=len(p)
+    if k==None:
+        k=l
+    if l==n:
+        return matrix(QQ,m,n,lambda x,y:p[x]==y)
+    return factorial(n-k)/binomial(n,k)*matrix(m,n,lambda x,y:sum([binomial(x,j)*binomial(n-1-x,k-1-j)*binomial(y,p[j])*binomial(n-1-y,k-1-p[j]) for j in range(l)]))
 # check if a list of matrices has a constant cover
 def hasConstantComb(matlist):
     n=len(matlist[0].list())
-    M=matrix([A.list() for A in matlist]).transpose()
+    M=matrix(QQ,[A.list() for A in matlist]).transpose()
     try:
         sol=M.solve_right(vector(n*[1]))
         return "covers with coefficients",sol
@@ -86,33 +96,41 @@ def searchRRRX(d):
             print(f" new record: perm {p3} produces {maxrepeats_nonzero} repeats")
     print()
     if record_repeats<(n-3)*n:
-        print(f"No constant cover possible, since max repeats = {record_repeats} < {(n-3)*n}.")
+        print(f"No non-vanishing constant cover possible, since max repeats = {record_repeats} < {(n-3)*n}.")
     else:
         print("CONSTANT COVER NOT RULED OUT")
     return
-# search using repeated entries of the last matrix out of five
-def searchRRRRX(d):
-    d0,d1,d2,d3,d4=d
+# search using repeated entries from the last two matrices out of four
+def searchRRXX(d):
+    d0,d1,d2,d3=d
     n=d0
     print("Verifying no constant cover via count of repeated nonzero entries.")
-    print(f"First four permutations leave at least {(n-4)*n} zeros.")
-    print(f"Computing most repeated nonzero entries in a {n}x{n} generalized {d4}-perm matrix.")
+    print(f"First two permutations leave at least {(n-2)*n} zeros.")
+    print(f"Computing most repeated nonzero entries in a {n}x{n} linear combination of a {d2}-perm and a {d3}-perm.")
     print()
     gpm={}
-    for p in Permutations(list(range(d4))):
+    for p in Permutations(list(range(d2))):
+        gpm[(tuple(p),n)]=genPermMatrix(p,n)
+    for p in Permutations(list(range(d3))):
         gpm[(tuple(p),n)]=genPermMatrix(p,n)
     record_repeats=0
-    for q4 in Permutations(d4):
-        p4=[x-1 for x in q4]
-        U=gpm[(tuple(p4),n)]
+    maxrepeats_nonzero=0
+    for q2 in Permutations(d2):
+        p2=[x-1 for x in q2]
+        U=gpm[(tuple(p2),n)]
         u=U.list()
-        maxrepeats_nonzero=mostRepeats(u)
+        for q3 in Permutations(d3):
+            if d3<d2 or q3<q2:
+                p3=[x-1 for x in q3]
+                V=gpm[(tuple(p3),n)]
+                v=V.list()
+                maxrepeats_nonzero=mostRepeatsPair(u,v)
         if maxrepeats_nonzero>record_repeats:
             record_repeats=maxrepeats_nonzero
-            print(f" new record: perm {p3} produces {maxrepeats_nonzero} repeats")
+            print(f" new record: pair {p2}, {p3} produces {maxrepeats_nonzero} repeats")
     print()
-    if record_repeats<(n-4)*n:
-        print(f"No constant cover possible, since max repeats = {record_repeats} < {(n-4)*n}.")
+    if record_repeats<(n-2)*n:
+        print(f"No non-vanishing constant cover possible, since max repeats = {record_repeats} < {(n-2)*n}.")
     else:
         print("CONSTANT COVER NOT RULED OUT")
     return
@@ -120,7 +138,7 @@ def searchRRRRX(d):
 def searchRRRXX(d):
     d0,d1,d2,d3,d4=d
     n=d0
-    print("Verifying no constant cover via count of repeated nonzero entries.")
+    print("Verifying no non-vanishing constant cover via count of repeated nonzero entries.")
     print(f"First three permutations leave at least {(n-3)*n} zeros.")
     print(f"Computing most repeated entries in a {n}x{n} linear combination of a {d3}-perm and a {d4}-perm.")
     print()
@@ -130,6 +148,7 @@ def searchRRRXX(d):
     for p in Permutations(list(range(d4))):
         gpm[(tuple(p),n)]=genPermMatrix(p,n)
     record_repeats=0
+    maxrepeats_nonzero=0
     for q3 in Permutations(d3):
         p3=[x-1 for x in q3]
         U=gpm[(tuple(p3),n)]
@@ -145,17 +164,17 @@ def searchRRRXX(d):
             print(f" new record: pair {p3}, {p4} produces {maxrepeats_nonzero} repeats")
     print()
     if record_repeats<(n-3)*n:
-        print("No constant cover possible.")
+        print(f"No non-vanishing constant cover possible, since max repeats = {record_repeats} < {(n-3)*n}.")
     else:
         print("CONSTANT COVER NOT RULED OUT")
     return
 # special search considering structure of repeated entries in shortest two perms
-def search66643(d):
+def searchRRRST(d):
     d0,d1,d2,d3,d4=d
     n=d0
-    print("Verifying no constant cover via structure of repeated nonzero entries.")
+    print("Verifying no non-vanishing constant cover via structure of repeated nonzero entries.")
     print(f"First three permutations leave at least {(n-3)*n} zeros.")
-    print("Linear combinations of a {d3}-perm and a {d4}-perm with this many repeats (X).")
+    print(f"Linear combinations of a {d3}-perm and a {d4}-perm with this many repeats (X).")
     print()
     structures=[]
     gpm={}
@@ -217,7 +236,7 @@ def saddleCheck(comb):
     print()
     return
 # display a linear combination of permutations in a nice way
-def displayComb(comb,latex=False):
+def displayComb(comb):
     s=len(comb)
     if comb[0][1]==1:
         ans=str(comb[0][0])
@@ -266,13 +285,15 @@ def searchXXXX(d):
                                                 print(f"CONSTANT COVER {displayComb(this_comb)}")
                                                 saddleCheck(this_comb)
     if constant_covers==[]:
-        print("No nonzero covers found.")
+        print("No non-vanishing constant covers found.")
     else:
-        print(f"Found {len(constant_covers)} distinct nonzero covers.")
+        print(f"Found {len(constant_covers)} distinct non-vanishing covers.")
     return
 # search constant covers based on latin squares of order 5
 def search55555(showall=False):
     load('https://raw.githubusercontent.com/pbd345/qr-perms/main/55555-modD4.sage')
+#    load('55555-modD4.sage')
+    print("Checking all D4-inequivalent latin squares of order 5.")
     for L in D4distinct_lists:
         H=matrix(QQ,16,16)
         for p in L:
@@ -284,96 +305,7 @@ def search55555(showall=False):
             this_comb=[[p,1] for p in L]
             print(f"CONSTANT COVER {displayComb(this_comb)}")
             saddleCheck(this_comb)
-    print(f"Found {len(D4distinct_lists)} distinct nonzero covers.")
-    return
-# search over five permutations of lengths 5,5,4,*,* exploiting structure on the first two
-def search554XX(d):
-    d0,d1,d2,d3,d4=d
-    n=d0 # should equal 5
-    gpm={}
-    for di in Set(d):
-        for p in Permutations(list(range(di))):
-            gpm[(tuple(p),n)]=genPermMatrix(p,n)
-    constant_covers=[]
-    for q0 in Permutations(d0):
-        #print(q0)
-        for q1 in Permutations(d1):
-            if q1<q0 and [(q0[i]+q1[i]-6)*(q0[i]-q1[i]) for i in range(n)]==[0]*n:
-                for q2 in Permutations(d2):
-                    if d2<d1 or q2<q1:
-                        for q3 in Permutations(d3):
-                            if d3<d2 or q3<q2:
-                                for q4 in Permutations(d4):
-                                    if d4<d3 or q4<q3:
-                                        rawperms=[q0,q1,q2,q3,q4]
-                                        perms=[[x-1 for x in q] for q in rawperms]
-                                        mats=[gpm[(tuple(p),n)] for p in perms]
-                                        result=hasConstantComb(mats)
-                                        if result!='does not cover' and 0 not in result[1]:
-                                            coeffs=standardize(result[1].list())
-                                            this_comb=[(perms[i],coeffs[i]) for i in range(len(perms))]
-                                            already_found=False
-                                            for c in constant_covers:
-                                                if equivCombsOfPerms(this_comb,c):
-                                                    already_found=True
-                                                    break
-                                            if not already_found:
-                                                constant_covers+=[this_comb]
-                                                print(f"CONSTANT COVER {displayComb(this_comb)}")
-                                                saddleCheck(this_comb)
-    if constant_covers==[]:
-        print("No nonzero covers found.")
-    else:
-        print(f"Found {len(constant_covers)} distinct nonzero covers.")
-    return
-# search over five permutations of lengths 6,6,5,5,* exploiting structure on the first two
-# not actually needed
-def search6655X(d):
-    d0,d1,d2,d3,d4=d
-    n=d0 # should equal 6
-    gpm={}
-    for di in Set([d2,d3,d4]):
-        for p in Permutations(list(range(di))):
-            gpm[(tuple(p),n)]=genPermMatrix(p,n)
-    constant_covers=[]
-    print("Checking symmetric combinations of two permutation matrices.")
-    starting_matrices=[]
-    for q0 in Permutations(d0):
-        for q1 in Permutations(d1):
-            #  first two permutations must combine to give reflective symmetry about middle
-            if q1<q0 and sum([(q0[i]+q1[i]-n-1)^2+(q0[i]+q0[n-1-i]-n-1)^2 for i in range(n)])==0:
-                p0=[x-1 for x in q0]
-                p1=[x-1 for x in q1]
-                gpm[(tuple(p0),n)]=genPermMatrix(p0,n)
-                gpm[(tuple(p1),n)]=genPermMatrix(p1,n)
-                this_mat=gpm[(tuple(p0),n)]+gpm[(tuple(p1),n)]
-                if this_mat not in starting_matrices:
-                    starting_matrices+=[this_mat]
-                    for q2 in Permutations(d2):
-                        for q3 in Permutations(d3):
-                            if d3<d2 or q3<q2:
-                                for q4 in Permutations(d4):
-                                    if d4<d3 or q4<q3:
-                                        rawperms=[q0,q1,q2,q3,q4]
-                                        perms=[[x-1 for x in q] for q in rawperms]
-                                        mats=[gpm[(tuple(p),n)] for p in perms]
-                                        result=hasConstantComb(mats)
-                                        if result!='does not cover' and 0 not in result[1]:
-                                            coeffs=standardize(result[1].list())
-                                            this_comb=[(perms[i],coeffs[i]) for i in range(len(perms))]
-                                            already_found=False
-                                            for c in constant_covers:
-                                                if equivCombsOfPerms(this_comb,c):
-                                                    already_found=True
-                                                    break
-                                            if not already_found:
-                                                constant_covers+=[this_comb]
-                                                print(f"CONSTANT COVER {displayComb(this_comb)}")
-                                                saddleCheck(this_comb)
-    if constant_covers==[]:
-        print("No nonzero covers found.")
-    else:
-        print(f"Found {len(constant_covers)} distinct nonzero covers.")
+    print(f"Found {len(D4distinct_lists)} distinct covers.")
     return
 # search over five permutations of specified lengths
 def searchXXXXX(d):
@@ -383,11 +315,11 @@ def searchXXXXX(d):
     for di in Set(d):
         for p in Permutations(list(range(di))):
             gpm[(tuple(p),n)]=genPermMatrix(p,n)
+    print("Conducting full search for non-vanishing constant covers.")
     constant_covers=[]
     for q0 in Permutations(d0):
-        #print(q0)
         for q1 in Permutations(d1):
-            if d1<d0 or q1<q0:
+            if q1<q0 and (d2==d1 or [(q0[i]+q1[i]-(n+1))*(q0[i]+(-1)^n*q1[i]) for i in range(n)]==[0]*n):
                 for q2 in Permutations(d2):
                     if d2<d1 or q2<q1:
                         for q3 in Permutations(d3):
@@ -411,20 +343,11 @@ def searchXXXXX(d):
                                                 print(f"CONSTANT COVER {displayComb(this_comb)}")
                                                 saddleCheck(this_comb)
     if constant_covers==[]:
-        print("No nonzero covers found.")
+        print("No non-vanishing constant covers found.")
     else:
-        print(f"Found {len(constant_covers)} distinct nonzero covers.")
+        print(f"Found {len(constant_covers)} distinct non-vanishing covers.")
     return
-# search using partial permutations on the first few rows
-def genPermMatrixByRow(p,n,m=None,k=None):
-    if m==None:
-        m=n
-    l=len(p)
-    if k==None:
-        k=l
-    if l==n:
-        return matrix(m,n,lambda x,y:p[x]==y)
-    return factorial(n-k)/binomial(n,k)*matrix(m,n,lambda x,y:sum([binomial(x,j)*binomial(n-1-x,k-1-j)*binomial(y,p[j])*binomial(n-1-y,k-1-p[j]) for j in range(l)]))
+# search using partial permutations on the first few rows, storing candidates for consideration of next row
 def searchByRow(d):
     d0,d1,d2,d3,d4=d
     n=d0
@@ -493,16 +416,16 @@ def search(d):
         print("QR-forcing expressions require a permutation of length at least four.")
         return
     if d[0]!=d[1]:
-        print("NO CONSTANT COVER POSSIBLE, since the maximum length must be repeated.")
+        print("No constant cover possible, since the maximum length must be repeated.")
         return
     if d[0]-d[2]>1:
-        print("NO CONSTANT COVER POSSIBLE, since third largest length is too short.")
+        print("No constant cover possible, since third largest length is too short.")
         return
     if d[0]-d[3]>2+(d[0]-d[2]):
-        print("NO CONSTANT COVER POSSIBLE, since fourth largest length is too short.")
+        print("No constant cover possible, since fourth largest length is too short.")
         return
     if r==4 and d[0]>6:
-        print("NO CONSTANT COVER POSSIBLE, since first three permutations leave more than two entries uncovered.")
+        print("No non-vanishing constant cover possible, since first three permutations leave more than two entries uncovered.")
         return
     if r==4 and d[0:3] in [[5,5,5],[6,6,6]]:
         searchRRRX(d)
@@ -514,20 +437,24 @@ def search(d):
         searchXXXX(d)
         return
 # r = 5 cases start here    
+    #r=5 begins here
     if d[0]-d[4]>3+(d[0]-d[2])+(d[0]-d[3]):
-        print("NO CONSTANT COVER POSSIBLE, since fifth largest length is too short.")
+        print("No constant cover possible, since fifth largest length is too short.")
+        return
+    if d[0]>10 or 4+(d[0]-d[2])+(d[0]-d[3])<d[0]-2:
+        print("No non-vanishing constant cover possible, since first four permutations leave more than two entries uncovered.")
         return
     if d==[5,5,5,5,5]:
         search55555(True) # True: show all covers; False: show only those failing the Hessian check
         return
-    if d[0]>10 or 4+(d[0]-d[2])+(d[0]-d[3])<d[0]-2:
-        print("NO CONSTANT COVER POSSIBLE, since first four permutations leave more than two entries uncovered.")
-        return        
-    if d[0]<=4:
-        searchXXXXX(d)
+    if d in [[5,5,5,3,2],[5,5,5,4,2],[5,5,5,4,4]]:
+        searchRRRXX(d)
         return
-    if d[0:3]==[5,5,4]:
-        search554XX(d)
+    if d==[5,5,5,4,3]:
+        searchRRRST(d)
+        return
+    if d[0]<=4 or d[0:3]==[5,5,4]:
+        searchXXXXX(d)
         return
     if d[0]>=5:
         searchByRow(d)
