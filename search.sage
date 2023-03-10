@@ -18,6 +18,8 @@ def genPermMatrixByRow(p,n,m=None,k=None):
 def hasConstantComb(matlist):
     n=len(matlist[0].list())
     M=matrix(QQ,[A.list() for A in matlist]).transpose()
+    if M.rank()<len(matlist)-1:
+        print("WARNING: cover is not unique up to scaling!")
     try:
         sol=M.solve_right(vector(n*[1]))
         return "covers with coefficients",sol
