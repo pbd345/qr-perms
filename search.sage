@@ -223,8 +223,8 @@ def searchRRRST(d):
     print("No constant cover possible.")
     return
 # Hessian matrices, normalized as in earlier paper but extended to include 5-perms
-#load('https://raw.githubusercontent.com/pbd345/qr-perms/main/Hessians.sage')
-load('Hessians.sage')
+load('https://raw.githubusercontent.com/pbd345/qr-perms/main/Hessians.sage')
+#load('Hessians.sage')
 # check Hessian eigenvalues for a linear combination [[perm1,coeff1],[perm2,coeff2],...]
 def saddleCheck(comb):
     H=sum([term[1]*Hessians[tuple(term[0])] for term in comb])
@@ -301,8 +301,8 @@ def searchXXXX(d):
     return
 # search constant covers based on latin squares of order 5
 def search55555(showall=False):
-#    load('https://raw.githubusercontent.com/pbd345/qr-perms/main/55555-modD4.sage')
-    load('55555-modD4.sage')
+    load('https://raw.githubusercontent.com/pbd345/qr-perms/main/55555-modD4.sage')
+#    load('55555-modD4.sage')
     print("Checking all D4-inequivalent latin squares of order 5.")
     for L in D4distinct_lists:
         H=matrix(QQ,16,16)
