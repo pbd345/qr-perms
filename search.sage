@@ -17,15 +17,21 @@ def genPermMatrixByRow(p,n,m=None,k=None):
 # check if a list of matrices has a constant cover
 def hasConstantComb(matlist):
     n=len(matlist[0].list())
-    M=matrix(QQ,[A.list() for A in matlist]).transpose()
-    if M.rank()<len(matlist)-1:
-        print("WARNING: cover is not unique up to scaling!")
-    try:
-        sol=M.solve_right(vector(n*[1]))
-        return "covers with coefficients",sol
-    except ValueError:
-        return "does not cover"
-# make nice coefficients
+    M=matrix(QQ,[A.list() for A in matlist]+[n*[1]]).transpose()
+    if M.rank()==len(matlist)+1:
+        return "does not cover",0
+    B=M.right_kernel().basis()
+    if len(B)==1:
+        v=B[0]
+        if v[-1]!=0:
+            return "covers",vector(v[0:len(matlist)])/v[-1]
+        else:
+            return "zero cover",0
+    for v in B:
+        if v[-1]!=0:
+            return "many covers",vector(v[0:len(matlist)])/v[-1]
+    return "zero cover",0
+# make nice integer coefficients
 def standardize(c):
     g=gcd(c)
     return [x/g for x in c]
@@ -217,8 +223,8 @@ def searchRRRST(d):
     print("No constant cover possible.")
     return
 # Hessian matrices, normalized as in earlier paper but extended to include 5-perms
-load('https://raw.githubusercontent.com/pbd345/qr-perms/main/Hessians.sage')
-#load('Hessians.sage')
+#load('https://raw.githubusercontent.com/pbd345/qr-perms/main/Hessians.sage')
+load('Hessians.sage')
 # check Hessian eigenvalues for a linear combination [[perm1,coeff1],[perm2,coeff2],...]
 def saddleCheck(comb):
     H=sum([term[1]*Hessians[tuple(term[0])] for term in comb])
@@ -245,7 +251,7 @@ def displayComb(comb):
     else:
         ans=str(comb[0][1])+'*'+str(comb[0][0])
     for i in range(1,s):
-        if comb[i][1]>0:
+        if comb[i][1]>=0:
             ans+=' +'
         else:
             ans+=' '
@@ -274,8 +280,8 @@ def searchXXXX(d):
                                         perms=[[x-1 for x in q] for q in rawperms]
                                         mats=[gpm[(tuple(p),n)] for p in perms]
                                         result=hasConstantComb(mats)
-                                        if result!='does not cover' and 0 not in result[1]:
-                                            coeffs=standardize(result[1].list())
+                                        if (result[0]=='covers' and 0 not in result[1]) or result[0]=='many covers':
+                                            coeffs=standardize(result[1])
                                             this_comb=[(perms[i],coeffs[i]) for i in range(len(perms))]
                                             already_found=False
                                             for c in constant_covers:
@@ -284,6 +290,8 @@ def searchXXXX(d):
                                                     break
                                             if not already_found:
                                                 constant_covers+=[this_comb]
+                                                if result[0]=='many covers':
+                                                    print("Warning: cover is not unique")
                                                 print(f"CONSTANT COVER {displayComb(this_comb)}")
                                                 saddleCheck(this_comb)
     if constant_covers==[]:
@@ -293,8 +301,8 @@ def searchXXXX(d):
     return
 # search constant covers based on latin squares of order 5
 def search55555(showall=False):
-    load('https://raw.githubusercontent.com/pbd345/qr-perms/main/55555-modD4.sage')
-#    load('55555-modD4.sage')
+#    load('https://raw.githubusercontent.com/pbd345/qr-perms/main/55555-modD4.sage')
+    load('55555-modD4.sage')
     print("Checking all D4-inequivalent latin squares of order 5.")
     for L in D4distinct_lists:
         H=matrix(QQ,16,16)
@@ -332,8 +340,8 @@ def searchXXXXX(d):
                                         perms=[[x-1 for x in q] for q in rawperms]
                                         mats=[gpm[(tuple(p),n)] for p in perms]
                                         result=hasConstantComb(mats)
-                                        if result!='does not cover' and 0 not in result[1]:
-                                            coeffs=standardize(result[1].list())
+                                        if (result[0]=='covers' and 0 not in result[1]) or result[0]=='many covers':
+                                            coeffs=standardize(result[1])
                                             this_comb=[(perms[i],coeffs[i]) for i in range(len(perms))]
                                             already_found=False
                                             for c in constant_covers:
@@ -342,6 +350,8 @@ def searchXXXXX(d):
                                                     break
                                             if not already_found:
                                                 constant_covers+=[this_comb]
+                                                if result[0]=='many covers':
+                                                    print("Warning: cover is not unique")
                                                 print(f"CONSTANT COVER {displayComb(this_comb)}")
                                                 saddleCheck(this_comb)
     if constant_covers==[]:
@@ -392,7 +402,7 @@ def searchByRow(d):
                                                             if [Q[0:m-1] for Q in perms] in [R[0:len(perms)] for R in prefixes[-1]]:
                                                                 mats=[gpm[(tuple(perms[i]),n,m,d[i])] for i in range(5)]
                                                                 result=hasConstantComb(mats)
-                                                                if result!='does not cover':
+                                                                if result[0] in ['covers','many covers']:
                                                                     these_prefixes+=[perms]
                                                                 #print(perms)
         if these_prefixes==[]:
