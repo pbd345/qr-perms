@@ -268,6 +268,7 @@ def searchXXXX(d):
     for di in Set(d):
         for p in Permutations(list(range(di))):
             gpm[(tuple(p),n)]=genPermMatrix(p,n)
+    print("Conducting full search for non-vanishing constant covers.")
     constant_covers=[]
     for q0 in Permutations(d0):
         for q1 in Permutations(d1):
