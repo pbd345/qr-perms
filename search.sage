@@ -218,6 +218,8 @@ def searchRRRST(d):
                                             print("O",end='')
                                     if rowcounter<n-3:
                                         print(" <--- can't be covered with three permutations",end='')
+                                    if rowcounter==n:
+                                        print(" <--- three permutations would need to agree here",end='')
                                     print()
                         print()
     print("No constant cover possible.")
