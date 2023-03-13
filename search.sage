@@ -16,21 +16,23 @@ def genPermMatrixByRow(p,n,m=None,k=None):
     return factorial(n-k)/binomial(n,k)*matrix(m,n,lambda x,y:sum([binomial(x,j)*binomial(n-1-x,k-1-j)*binomial(y,p[j])*binomial(n-1-y,k-1-p[j]) for j in range(l)]))
 # check if a list of matrices has a constant cover
 def hasConstantComb(matlist):
-    n=len(matlist[0].list())
-    M=matrix(QQ,[A.list() for A in matlist]+[n*[1]]).transpose()
-    if M.rank()==len(matlist)+1:
+    r=len(matlist)
+    N=len(matlist[0].list())
+    Maug=matrix(QQ,[A.list() for A in matlist]+[N*[1]]).transpose()
+    if Maug.rank()==r+1:
         return "does not cover",0
-    B=M.right_kernel().basis()
-    if len(B)==1:
-        v=B[0]
-        if v[-1]!=0:
-            return "covers",vector(v[0:len(matlist)])/v[-1]
-        else:
-            return "zero cover",0
+    if Maug.rank()==r:
+        M=Maug[0:N,0:r]
+        try:
+            sol=M.solve_right(vector(N*[1]))
+            return "covers",sol
+        except ValueError:
+            return "vanishing cover"        
+    B=Maug.right_kernel().basis()
     for v in B:
         if v[-1]!=0:
             return "many covers",vector(v[0:len(matlist)])/v[-1]
-    return "zero cover",0
+    return "vanishing cover"        
 # make nice integer coefficients
 def standardize(c):
     g=gcd(c)
@@ -228,8 +230,8 @@ def searchRRRST(d):
 load('https://raw.githubusercontent.com/pbd345/qr-perms/main/Hessians.sage')
 #load('Hessians.sage')
 # check Hessian eigenvalues for a linear combination [[perm1,coeff1],[perm2,coeff2],...]
-def saddleCheck(comb):
-    H=sum([term[1]*Hessians[tuple(term[0])] for term in comb])
+def saddleCheck(rho):
+    H=sum([term[1]*Hessians[tuple(term[0])] for term in rho])
     evals=H.eigenvalues()
     print("Min Hessian eigenvalue ",end='')
     lam_min=min(evals)
@@ -245,8 +247,42 @@ def saddleCheck(comb):
         print("<= 0; ad-hoc construction needed.")                                                    
     print()
     return
+def saddleSpecial():
+    V=matrix(QQ,17,17,lambda i,j:(i-8)^j) # Vandermonde matrix, to compute a symbolic determinant
+    W=V.inverse()
+    xi=[[[2, 1, 0], -2], [[0, 1, 2], 2], [[0, 1], -3]]
+    K=sum([term[1]*Hessians[tuple(term[0])] for term in xi])
+    multi_covers=[[[[2, 0, 3, 1], 3], [[1, 3, 0, 2], 3], [[2, 1, 0], 2], [[0, 1, 2], 2]],
+    [[[2, 3, 0, 1], 3], [[1, 0, 3, 2], 3], [[2, 1, 0], 2], [[0, 1, 2], 2]],
+    [[[3, 1, 2, 0], -3], [[0, 2, 1, 3], -3], [[2, 1, 0], 2], [[0, 1, 2], 2]],
+    [[[3, 2, 1, 0], -3], [[0, 1, 2, 3], -3], [[2, 1, 0], 2], [[0, 1, 2], 2]]]
+    test_vals=[[-2,-1,-71/100,-1/2,-1/20,-1/50,1/50,1/20,1/2,71/100,1,2],
+    [-3,-3/2,-9/10,-5/6,-3/4,-1/2,-47/100,-43/100,0,43/100,47/100,1/2,3/4,5/6,9/10,3/2,3],
+    [-3,-3/2,-1095/1000,-3/4,-43/100,-1/3,-1/5,0,1/5,1/3,43/100,3/4,1095/1000,3/2,3],
+    [-2,-1,-1/3,-2/7,-1/4,-1/5,0,1/5,1/4,2/7,1/3,1,2]]
+    for i in range(4):
+        rho=multi_covers[i]
+        print("CONSTANT COVER ",displayComb(rho,' + t*xi'))
+        H=sum([term[1]*Hessians[tuple(term[0])] for term in rho])
+        detvals=vector([det(H+t*K) for t in range(-8,9)])
+        detcoeffs=W*detvals
+        var('t')
+        poly=sum([detcoeffs[i]*t^i for i in range(17)])
+        fpoly=factor(poly)
+        print(f"Hessian determinant = {fpoly}.")
+        print("Checking Hessian eigenvalues at values of t interlacing the zeros.")
+        for tt in test_vals[i]:
+            evals=(H+tt*K).eigenvalues()
+            lam_min=min(evals)
+            lam_max=max(evals)
+            print(f" at t = {tt}, min eigenvalue = {numerical_approx(lam_min, digits=6)}, max eigenvalue = {numerical_approx(lam_max, digits=6)}",end='')
+            if lam_min>=0:
+                print(" <-- ad hoc construction needed for this interval")
+            else:
+                print()
+        print()
 # display a linear combination of permutations in a nice way
-def displayComb(comb):
+def displayComb(comb,suffix=''):
     s=len(comb)
     if comb[0][1]==1:
         ans=str(comb[0][0])
@@ -261,7 +297,7 @@ def displayComb(comb):
             ans+=' '+str(comb[i][0])
         else:
             ans+=str(comb[i][1])+'*'+str(comb[i][0])
-    return ans
+    return ans+suffix
 # search over four permutations of specified lengths
 def searchXXXX(d):
     d0,d1,d2,d3=d
@@ -270,7 +306,6 @@ def searchXXXX(d):
     for di in Set(d):
         for p in Permutations(list(range(di))):
             gpm[(tuple(p),n)]=genPermMatrix(p,n)
-    print("Conducting full search for non-vanishing constant covers.")
     constant_covers=[]
     for q0 in Permutations(d0):
         for q1 in Permutations(d1):
@@ -283,7 +318,7 @@ def searchXXXX(d):
                                         perms=[[x-1 for x in q] for q in rawperms]
                                         mats=[gpm[(tuple(p),n)] for p in perms]
                                         result=hasConstantComb(mats)
-                                        if (result[0]=='covers' and 0 not in result[1]) or result[0]=='many covers':
+                                        if result[0]=='covers' and 0 not in result[1]:
                                             coeffs=standardize(result[1])
                                             this_comb=[(perms[i],coeffs[i]) for i in range(len(perms))]
                                             already_found=False
@@ -293,8 +328,6 @@ def searchXXXX(d):
                                                     break
                                             if not already_found:
                                                 constant_covers+=[this_comb]
-                                                if result[0]=='many covers':
-                                                    print("Warning: cover is not unique")
                                                 print(f"CONSTANT COVER {displayComb(this_comb)}")
                                                 saddleCheck(this_comb)
     if constant_covers==[]:
@@ -343,7 +376,7 @@ def searchXXXXX(d):
                                         perms=[[x-1 for x in q] for q in rawperms]
                                         mats=[gpm[(tuple(p),n)] for p in perms]
                                         result=hasConstantComb(mats)
-                                        if (result[0]=='covers' and 0 not in result[1]) or result[0]=='many covers':
+                                        if result[0]=='covers' and 0 not in result[1]:
                                             coeffs=standardize(result[1])
                                             this_comb=[(perms[i],coeffs[i]) for i in range(len(perms))]
                                             already_found=False
@@ -353,8 +386,6 @@ def searchXXXXX(d):
                                                     break
                                             if not already_found:
                                                 constant_covers+=[this_comb]
-                                                if result[0]=='many covers':
-                                                    print("Warning: cover is not unique")
                                                 print(f"CONSTANT COVER {displayComb(this_comb)}")
                                                 saddleCheck(this_comb)
     if constant_covers==[]:
@@ -458,6 +489,15 @@ def search(d):
         return
     if d[0]>10 or 4+(d[0]-d[2])+(d[0]-d[3])<d[0]-2:
         print("No non-vanishing constant cover possible, since first four permutations leave more than two entries uncovered.")
+        return
+    if d==[4,4,3,2,2]:
+        print("Four families exist, from the [4,4,3,2] covers translated by multiples of (12) + (21).")
+        return
+    if d==[4,4,3,3,2]:
+        searchXXXXX([4,4,3,3,2])
+        print("Additionally, four families arise from the [4,4,3,3] covers translated by multiples of xi = 2*(123) - 2*(321) - 3*(12).")
+        print()
+        saddleSpecial()
         return
     if d==[5,5,5,5,5]:
         search55555(True) # True: show all covers; False: show only those failing the Hessian check
