@@ -258,7 +258,7 @@ def saddleSpecial():
     [[[3, 2, 1, 0], -3], [[0, 1, 2, 3], -3], [[2, 1, 0], 2], [[0, 1, 2], 2]]]
     test_vals=[[-2,-1,-71/100,-1/2,-1/20,-1/50,1/50,1/20,1/2,71/100,1,2],
     [-3,-3/2,-9/10,-5/6,-3/4,-1/2,-47/100,-43/100,0,43/100,47/100,1/2,3/4,5/6,9/10,3/2,3],
-    [-3,-3/2,-1095/1000,-3/4,-43/100,-1/3,-1/5,0,1/5,1/3,43/100,3/4,1095/1000,3/2,3],
+    [-3,-3/2,-219/200,-3/4,-43/100,-1/3,-1/5,0,1/5,1/3,43/100,3/4,219/200,3/2,3],
     [-2,-1,-1/3,-2/7,-1/4,-1/5,0,1/5,1/4,2/7,1/3,1,2]]
     for i in range(4):
         rho=multi_covers[i]
@@ -267,6 +267,7 @@ def saddleSpecial():
         detvals=vector([det(H+t*K) for t in range(-8,9)])
         detcoeffs=W*detvals
         var('t')
+        spacing=' '*(8-len(str(tt)))
         poly=sum([detcoeffs[i]*t^i for i in range(17)])
         fpoly=factor(poly)
         print(f"Hessian determinant = {fpoly}.")
@@ -279,7 +280,7 @@ def saddleSpecial():
                 detsign='-'
             lam_min=min(evals)
             lam_max=max(evals)
-            print(f" at t = {tt}, det sign = {detsign}, min eigenvalue = {numerical_approx(lam_min, digits=6)}, max eigenvalue = {numerical_approx(lam_max, digits=6)}",end='')
+            print(f" at t = {tt},{spacing} det sign = {detsign}, min eigenvalue = {numerical_approx(lam_min, digits=6)}, max eigenvalue = {numerical_approx(lam_max, digits=6)}",end='')
             if lam_min>=0:
                 print(" <-- ad hoc construction needed for this interval")
             else:
