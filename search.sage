@@ -507,10 +507,10 @@ def search(d):
     if d==[5,5,5,5,5]:
         search55555(True) # True: show all covers; False: show only those failing the Hessian check
         return
-    if d in [[5,5,5,3,2],[5,5,5,4,2],[5,5,5,4,4]]:
+    if d in [[5,5,5,3,2],[5,5,5,4,4]]:
         searchRRRXX(d)
         return
-    if d==[5,5,5,4,3]:
+    if d in [[5,5,5,4,2], [5,5,5,4,3]]:
         searchRRRST(d)
         return
     if d[0]<=4 or d[0:3]==[5,5,4]:
