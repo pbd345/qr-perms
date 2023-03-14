@@ -267,7 +267,6 @@ def saddleSpecial():
         detvals=vector([det(H+t*K) for t in range(-8,9)])
         detcoeffs=W*detvals
         var('t')
-        spacing=' '*(8-len(str(tt)))
         poly=sum([detcoeffs[i]*t^i for i in range(17)])
         fpoly=factor(poly)
         print(f"Hessian determinant = {fpoly}.")
@@ -278,6 +277,7 @@ def saddleSpecial():
                 detsign='+'
             if poly(t=tt)<0:
                 detsign='-'
+            spacing=' '*(8-len(str(tt)))
             lam_min=min(evals)
             lam_max=max(evals)
             print(f" at t = {tt},{spacing} det sign = {detsign}, min eigenvalue = {numerical_approx(lam_min, digits=6)}, max eigenvalue = {numerical_approx(lam_max, digits=6)}",end='')
