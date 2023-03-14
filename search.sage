@@ -31,7 +31,7 @@ def hasConstantComb(matlist):
     B=Maug.right_kernel().basis()
     for v in B:
         if v[-1]!=0:
-            return "many covers",vector(v[0:len(matlist)])/v[-1]
+            return "many covers",vector(v[0:r])/v[-1]
     return "vanishing cover"        
 # make nice integer coefficients
 def standardize(c):
@@ -273,9 +273,13 @@ def saddleSpecial():
         print("Checking Hessian eigenvalues at values of t interlacing the zeros.")
         for tt in test_vals[i]:
             evals=(H+tt*K).eigenvalues()
+            if poly(t=tt)>0:
+                detsign='+'
+            if poly(t=tt)<0:
+                detsign='-'
             lam_min=min(evals)
             lam_max=max(evals)
-            print(f" at t = {tt}, min eigenvalue = {numerical_approx(lam_min, digits=6)}, max eigenvalue = {numerical_approx(lam_max, digits=6)}",end='')
+            print(f" at t = {tt}, det sign = {detsign}, min eigenvalue = {numerical_approx(lam_min, digits=6)}, max eigenvalue = {numerical_approx(lam_max, digits=6)}",end='')
             if lam_min>=0:
                 print(" <-- ad hoc construction needed for this interval")
             else:
